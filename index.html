@@ -13,15 +13,11 @@
 
 <style>
 :root {
-  --primary: #a6c1ee;      /* soft highlight color */
-  --bg: #1f1f1f;           /* base background */
-  --card: #2a2a2a;         /* card background */
-  --input: #3a3a3a;        /* input background */
-  --text: #e0e0e0;         /* main text color */
-}
-
-* {
-  box-sizing: border-box;
+  --primary: #a6c1ee;
+  --bg: #1f1f1f;
+  --card: #2a2a2a;
+  --input: #3a3a3a;
+  --text: #e0e0e0;
 }
 
 body {
@@ -32,7 +28,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  min-height: 100vh;
 }
 
 .container {
@@ -40,9 +36,10 @@ body {
   padding: 28px;
   border-radius: 18px;
   width: 92%;
-  max-width: 400px;
+  max-width: 420px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.3);
   text-align: center;
+  transition: background 0.3s;
 }
 
 h1 {
@@ -50,6 +47,7 @@ h1 {
   font-weight: 500;
   font-size: 22px;
   color: var(--primary);
+  transition: color 0.3s;
 }
 
 input[type="time"] {
@@ -58,10 +56,11 @@ input[type="time"] {
   border-radius: 12px;
   border: none;
   font-size: 16px;
-  margin: 15px 0;
+  margin: 12px 0;
   background: var(--input);
   color: var(--text);
   text-align: center;
+  transition: background 0.3s, color 0.3s;
 }
 
 .result {
@@ -70,6 +69,7 @@ input[type="time"] {
   margin: 18px 0;
   color: var(--primary);
   word-break: break-word;
+  transition: color 0.3s;
 }
 
 button {
@@ -82,7 +82,8 @@ button {
   cursor: pointer;
   background: var(--primary);
   color: var(--bg);
-  transition: 0.15s ease;
+  transition: 0.15s ease, background 0.3s, color 0.3s;
+  margin-top: 8px;
 }
 
 button:active {
@@ -90,10 +91,37 @@ button:active {
   opacity: 0.9;
 }
 
+.select-container {
+  margin: 12px 0;
+}
+
 .footer {
   font-size: 12px;
   opacity: 0.6;
-  margin-top: 14px;
+  margin-top: 12px;
+}
+
+.customize-panel {
+  display: none;
+  margin-top: 12px;
+  text-align: left;
+  transition: all 0.3s;
+}
+
+.customize-panel label {
+  display: block;
+  margin: 6px 0 2px;
+  font-size: 12px;
+}
+.customize-panel input[type="color"] {
+  width: 100%;
+  height: 36px;
+  border: none;
+  padding: 0;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 </style>
 </head>
@@ -105,6 +133,31 @@ button:active {
 
   <input type="time" id="targetTime" value="10:00">
 
+  <div class="select-container">
+    <select id="themeSelect">
+      <option value="theme1">Soft Dark (default)</option>
+      <option value="theme2">Soft Blue</option>
+      <option value="theme3">Soft Green</option>
+      <option value="theme4">Purple Glow</option>
+      <option value="theme5">Warm Dark</option>
+    </select>
+    <button id="customizeBtn">Customize Theme</button>
+  </div>
+
+  <div class="customize-panel" id="customizePanel">
+    <label>Primary Color</label>
+    <input type="color" id="customPrimary">
+    <label>Background</label>
+    <input type="color" id="customBg">
+    <label>Card Background</label>
+    <input type="color" id="customCard">
+    <label>Input Background</label>
+    <input type="color" id="customInput">
+    <label>Text Color</label>
+    <input type="color" id="customText">
+    <button id="saveCustom">Save Custom Theme</button>
+  </div>
+
   <div class="result" id="result">Calculating...</div>
 
   <button onclick="copyText()">Copy Command</button>
@@ -115,28 +168,121 @@ button:active {
 </div>
 
 <script>
+// Predefined themes
+const themes = {
+  theme1: {primary:'#a6c1ee', bg:'#1f1f1f', card:'#2a2a2a', input:'#3a3a3a', text:'#e0e0e0'},
+  theme2: {primary:'#6fb3ff', bg:'#1b1d2c', card:'#272a3a', input:'#3a3a4a', text:'#e0e0e0'},
+  theme3: {primary:'#7fff7f', bg:'#1b2c1b', card:'#293a29', input:'#3a4a3a', text:'#e0e0e0'},
+  theme4: {primary:'#d18aff', bg:'#1a1a2a', card:'#2a203a', input:'#3a2a4a', text:'#e0e0e0'},
+  theme5: {primary:'#ffb37f', bg:'#2a1f1a', card:'#3a2a2a', input:'#4a3a3a', text:'#f0e0d0'}
+};
+
+const themeSelect = document.getElementById('themeSelect');
+const customizeBtn = document.getElementById('customizeBtn');
+const customizePanel = document.getElementById('customizePanel');
+const saveCustom = document.getElementById('saveCustom');
+
+const customInputs = {
+  primary: document.getElementById('customPrimary'),
+  bg: document.getElementById('customBg'),
+  card: document.getElementById('customCard'),
+  input: document.getElementById('customInput'),
+  text: document.getElementById('customText')
+};
+
+// Apply theme to document
+function applyTheme(themeObj){
+  for(const key in themeObj){
+    document.documentElement.style.setProperty(`--${key}`, themeObj[key]);
+  }
+}
+
+// Load saved theme
+let savedTheme = localStorage.getItem('theme');
+if(savedTheme){
+  try{
+    const parsed = JSON.parse(savedTheme);
+    if(parsed.custom) {
+      applyTheme(parsed.colors);
+    } else {
+      applyTheme(themes[parsed.name]);
+      themeSelect.value = parsed.name;
+    }
+  }catch(e){}
+} else {
+  applyTheme(themes.theme1);
+}
+
+// Change theme from selector
+themeSelect.addEventListener('change', ()=>{
+  const selected = themeSelect.value;
+  applyTheme(themes[selected]);
+  localStorage.setItem('theme', JSON.stringify({name:selected}));
+});
+
+// Show/hide customize panel
+customizeBtn.addEventListener('click', ()=>{
+  customizePanel.style.display = customizePanel.style.display==='none'?'block':'none';
+  // Load current colors for live preview
+  const computed = getComputedStyle(document.documentElement);
+  customInputs.primary.value = rgbToHex(computed.getPropertyValue('--primary'));
+  customInputs.bg.value = rgbToHex(computed.getPropertyValue('--bg'));
+  customInputs.card.value = rgbToHex(computed.getPropertyValue('--card'));
+  customInputs.input.value = rgbToHex(computed.getPropertyValue('--input'));
+  customInputs.text.value = rgbToHex(computed.getPropertyValue('--text'));
+});
+
+// Live preview for custom colors
+for(const key in customInputs){
+  customInputs[key].addEventListener('input', ()=>{
+    const colors = {
+      primary: customInputs.primary.value,
+      bg: customInputs.bg.value,
+      card: customInputs.card.value,
+      input: customInputs.input.value,
+      text: customInputs.text.value
+    };
+    applyTheme(colors);
+  });
+}
+
+// Save custom theme
+saveCustom.addEventListener('click', ()=>{
+  const colors = {
+    primary: customInputs.primary.value,
+    bg: customInputs.bg.value,
+    card: customInputs.card.value,
+    input: customInputs.input.value,
+    text: customInputs.text.value
+  };
+  applyTheme(colors);
+  localStorage.setItem('theme', JSON.stringify({custom:true, colors}));
+  customizePanel.style.display='none';
+});
+
+// Convert RGB to HEX
+function rgbToHex(rgb){
+  const result = /^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/.exec(rgb.replace(/\s+/g,''));
+  return result ? "#" + ((1 << 24) + (parseInt(result[1]) <<16) + (parseInt(result[2])<<8) + parseInt(result[3])).toString(16).slice(1) : rgb;
+}
+
+// Huntbot timer logic
 function updateTimer() {
   const now = new Date();
   const timeInput = document.getElementById("targetTime").value;
   if (!timeInput) return;
-
   const [hours, minutes] = timeInput.split(":").map(Number);
-
   let target = new Date();
   target.setHours(hours, minutes, 0, 0);
-
-  if (now >= target) {
-    target.setDate(target.getDate() + 1);
-  }
-
+  if(now >= target) target.setDate(target.getDate()+1);
   const diff = target - now;
-  const totalMinutes = Math.floor(diff / (1000 * 60));
-  const h = Math.floor(totalMinutes / 60);
+  const totalMinutes = Math.floor(diff/(1000*60));
+  const h = Math.floor(totalMinutes/60);
   const m = totalMinutes % 60;
-
   document.getElementById("result").innerText = `owo hb ${h}h${m}m`;
 }
 
+// Copy to clipboard
 function copyText() {
   const text = document.getElementById("result").innerText;
   navigator.clipboard.writeText(text);
