@@ -27,11 +27,39 @@ body {
   background: var(--bg);
   color: var(--text);
   display: flex;
-  justify-content: center;
+  flex-direction: column; /* stack ribbon and card vertically */
   align-items: center;
   min-height: 100vh;
 }
 
+/* Top Ribbon */
+.ribbon {
+  width: 100%;
+  background: var(--card);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+  box-sizing: border-box;
+}
+
+.ribbon img {
+  width: 36px;
+  height: 36px;
+  margin-right: 12px;
+  border-radius: 6px;
+}
+
+.ribbon h2 {
+  margin: 0;
+  font-size: 18px;
+  color: var(--primary);
+  font-weight: 500;
+}
+
+/* Calculator card */
 .container {
   background: var(--card);
   padding: 28px;
@@ -41,6 +69,7 @@ body {
   box-shadow: 0 10px 30px rgba(0,0,0,0.3);
   text-align: center;
   transition: background 0.3s;
+  margin-top: 16px; /* space below ribbon */
 }
 
 h1 {
@@ -163,12 +192,12 @@ button:active {
 
 <body>
 <!-- Top Ribbon -->
-<div style="width:100%; background:var(--card); padding:12px 16px; display:flex; align-items:center; box-shadow:0 4px 8px rgba(0,0,0,0.2); border-bottom-left-radius:12px; border-bottom-right-radius:12px; box-sizing:border-box;">
-  <img src="icon-192.png" alt="Huntbot Logo" style="width:36px; height:36px; margin-right:12px; border-radius:6px;">
-  <h2 style="margin:0; font-size:18px; color:var(--primary); font-weight:500;">Huntbot Time Calculator</h2>
+<div class="ribbon">
+  <img src="icon-192.png" alt="Huntbot Logo">
+  <h2>Huntbot Time Calculator</h2>
 </div>
 
-<!-- Keep container below ribbon -->
+<!-- Calculator Card -->
 <div class="container">
   <h1>⏳ Huntbot Timer</h1>
   <input type="time" id="targetTime" value="10:00">
@@ -252,7 +281,6 @@ if(savedTheme){
 // Toggle theme panel
 themeToggleBtn.addEventListener('click', ()=>{
   themePanel.style.display = themePanel.style.display==='flex'?'none':'flex';
-  // Load current colors
   const computed = getComputedStyle(document.documentElement);
   customInputs.primary.value = rgbToHex(computed.getPropertyValue('--primary'));
   customInputs.bg.value = rgbToHex(computed.getPropertyValue('--bg'));
