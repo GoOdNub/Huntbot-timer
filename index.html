@@ -5,357 +5,260 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Huntbot Timer</title>
 
-<!-- PWA / App Settings -->
-<meta name="theme-color" content="#2C2C2C">
-<link rel="manifest" href="manifest.json">
-<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#121212">
 
 <style>
-:root {
-  --primary: #a6c1ee;
-  --bg: #1f1f1f;
-  --card: #2a2a2a;
-  --input: #3a3a3a;
-  --text: #e0e0e0;
+:root{
+--primary:#7aa2ff;
+--bg:#121212;
+--card:rgba(255,255,255,0.05);
+--text:#e8e8e8;
+--blur:12px;
 }
 
-/* General styles */
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  display: flex;
-  flex-direction: column; /* stack ribbon and card vertically */
-  align-items: center;
-  min-height: 100vh;
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+
+body{
+margin:0;
+font-family:system-ui,-apple-system,Segoe UI,Roboto;
+background:var(--bg);
+color:var(--text);
+display:flex;
+flex-direction:column;
+align-items:center;
+min-height:100vh;
+overflow:hidden;
 }
 
-/* Top Ribbon */
-.ribbon {
-  width: 100%;
-  background: var(--card);
-  padding: 12px 16px;
-  display: flex;
-  align-items: center;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-  border-bottom-left-radius: 12px;
-  border-bottom-right-radius: 12px;
-  box-sizing: border-box;
+/* Animated gradient background (lightweight) */
+body::before{
+content:"";
+position:fixed;
+inset:0;
+background:radial-gradient(circle at 20% 20%,var(--primary)22%,transparent 60%);
+opacity:.08;
+animation:move 18s linear infinite;
+z-index:-1;
 }
 
-.ribbon img {
-  width: 36px;
-  height: 36px;
-  margin-right: 12px;
-  border-radius: 6px;
+@keyframes move{
+0%{transform:translate(0,0)}
+50%{transform:translate(30px,20px)}
+100%{transform:translate(0,0)}
 }
 
-.ribbon h2 {
-  margin: 0;
-  font-size: 18px;
-  color: var(--primary);
-  font-weight: 500;
+/* Card */
+.container{
+margin-top:60px;
+width:92%;
+max-width:420px;
+padding:28px;
+border-radius:22px;
+background:var(--card);
+backdrop-filter:blur(var(--blur));
+-webkit-backdrop-filter:blur(var(--blur));
+box-shadow:0 10px 30px rgba(0,0,0,.35);
+text-align:center;
+animation:fadeIn .5s ease;
 }
 
-/* Calculator card */
-.container {
-  background: var(--card);
-  padding: 28px;
-  border-radius: 18px;
-  width: 92%;
-  max-width: 420px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-  text-align: center;
-  transition: background 0.3s;
-  margin-top: 16px; /* space below ribbon */
+@keyframes fadeIn{
+from{opacity:0;transform:translateY(15px)}
+to{opacity:1;transform:none}
 }
 
-h1 {
-  margin-top: 0;
-  font-weight: 500;
-  font-size: 22px;
-  color: var(--primary);
-  transition: color 0.3s;
+h1{
+margin:0 0 15px;
+font-weight:500;
+color:var(--primary);
 }
 
-input[type="time"] {
-  padding: 12px;
-  width: 100%;
-  border-radius: 12px;
-  border: none;
-  font-size: 16px;
-  margin: 12px 0;
-  background: var(--input);
-  color: var(--text);
-  text-align: center;
-  transition: background 0.3s, color 0.3s;
+/* Time Input */
+input[type=time]{
+width:100%;
+padding:14px;
+border-radius:14px;
+border:none;
+background:rgba(255,255,255,.08);
+color:var(--text);
+font-size:18px;
+text-align:center;
+transition:.25s;
 }
 
-.result {
-  font-size: 24px;
-  font-weight: bold;
-  margin: 18px 0;
-  color: var(--primary);
-  word-break: break-word;
-  transition: color 0.3s;
+input[type=time]:focus{
+outline:none;
+box-shadow:0 0 0 2px var(--primary);
 }
 
-button {
-  width: 100%;
-  padding: 14px;
-  border-radius: 12px;
-  border: none;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-  background: var(--primary);
-  color: var(--bg);
-  transition: 0.15s ease, background 0.3s, color 0.3s;
-  margin-top: 8px;
+/* Result */
+.result{
+margin:22px 0;
+font-size:26px;
+font-weight:bold;
+color:var(--primary);
 }
 
-button:active {
-  transform: scale(0.97);
-  opacity: 0.9;
+/* Buttons */
+button{
+width:100%;
+padding:15px;
+margin-top:12px;
+border:none;
+border-radius:14px;
+font-size:16px;
+font-weight:600;
+cursor:pointer;
+background:linear-gradient(135deg,var(--primary),#5f8cff);
+color:#000;
+transition:transform .2s ease, box-shadow .2s ease;
 }
 
-.footer {
-  font-size: 12px;
-  opacity: 0.6;
-  margin-top: 12px;
+button:hover{
+transform:translateY(-2px);
+box-shadow:0 8px 18px rgba(0,0,0,.3);
+}
+
+button:active{
+transform:scale(.96);
+}
+
+.secondary{
+background:transparent;
+border:2px solid var(--primary);
+color:var(--primary);
 }
 
 /* Floating theme button */
-#themeToggleBtn {
-  position: fixed;
-  bottom: 16px;
-  right: 16px;
-  background: var(--primary);
-  color: var(--bg);
-  border-radius: 50%;
-  width: 48px;
-  height: 48px;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
+#themeBtn{
+position:fixed;
+bottom:20px;
+right:20px;
+width:64px;
+height:64px;
+border-radius:50%;
+font-size:26px;
+background:var(--primary);
+color:#000;
+display:flex;
+align-items:center;
+justify-content:center;
+box-shadow:0 10px 25px rgba(0,0,0,.4);
+transition:transform .3s ease;
 }
 
-/* Floating theme panel */
-#themePanel {
-  position: fixed;
-  bottom: 72px;
-  right: 16px;
-  background: var(--card);
-  padding: 16px;
-  border-radius: 16px;
-  width: 220px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-  display: none;
-  flex-direction: column;
-  z-index: 999;
+#themeBtn:hover{
+transform:rotate(20deg) scale(1.1);
 }
 
-#themePanel label {
-  font-size: 12px;
-  margin: 6px 0 2px;
+/* Theme panel */
+#themePanel{
+position:fixed;
+bottom:100px;
+right:20px;
+background:var(--card);
+backdrop-filter:blur(10px);
+padding:16px;
+border-radius:16px;
+display:none;
+flex-direction:column;
+width:200px;
+animation:fadeIn .25s ease;
 }
 
-#themePanel input[type="color"] {
-  width: 100%;
-  height: 36px;
-  border: none;
-  padding: 0;
-  margin-bottom: 8px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-#themePanel select {
-  width: 100%;
-  padding: 8px;
-  border-radius: 8px;
-  margin-bottom: 8px;
-  border: none;
-  background: var(--input);
-  color: var(--text);
+#themePanel select{
+padding:8px;
+border-radius:8px;
+border:none;
+background:rgba(255,255,255,.08);
+color:var(--text);
 }
 </style>
 </head>
-
 <body>
-<!-- Top Ribbon -->
-<div class="ribbon">
-  <img src="icon-192.png" alt="Huntbot Logo">
-  <h2>Huntbot Time Calculator</h2>
-</div>
 
-<!-- Calculator Card -->
 <div class="container">
-  <h1>⏳ Huntbot Timer</h1>
-  <input type="time" id="targetTime" value="10:00">
+<h1>⏳ Huntbot Timer</h1>
 
-  <div class="result" id="result">Calculating...</div>
-  <button onclick="copyText()">Copy Command</button>
-  <div class="footer">Always calculates next occurrence</div>
+<input type="time" id="targetTime">
+
+<div class="result" id="result">Calculating...</div>
+
+<button onclick="copyCmd()">Copy Command</button>
+<button class="secondary" onclick="resetTime()">Reset to 10:00</button>
 </div>
 
-<!-- Floating Theme Button -->
-<button id="themeToggleBtn">🎨</button>
+<button id="themeBtn">🎨</button>
 
-<!-- Theme Panel -->
 <div id="themePanel">
-  <select id="themeSelect">
-    <option value="theme1">Soft Dark</option>
-    <option value="theme2">Soft Blue</option>
-    <option value="theme3">Soft Green</option>
-    <option value="theme4">Purple Glow</option>
-    <option value="theme5">Warm Dark</option>
-  </select>
-  <label>Primary Color</label>
-  <input type="color" id="customPrimary">
-  <label>Background</label>
-  <input type="color" id="customBg">
-  <label>Card Background</label>
-  <input type="color" id="customCard">
-  <label>Input Background</label>
-  <input type="color" id="customInput">
-  <label>Text Color</label>
-  <input type="color" id="customText">
-  <button id="saveCustom">Save Theme</button>
+<select id="themeSelect">
+<option value="#7aa2ff">Blue</option>
+<option value="#7fff9f">Green</option>
+<option value="#ff9ad5">Pink</option>
+<option value="#ffc27a">Orange</option>
+<option value="#c08bff">Purple</option>
+</select>
 </div>
 
 <script>
-// Predefined themes
-const themes = {
-  theme1: {primary:'#a6c1ee', bg:'#1f1f1f', card:'#2a2a2a', input:'#3a3a3a', text:'#e0e0e0'},
-  theme2: {primary:'#6fb3ff', bg:'#1b1d2c', card:'#272a3a', input:'#3a3a4a', text:'#e0e0e0'},
-  theme3: {primary:'#7fff7f', bg:'#1b2c1b', card:'#293a29', input:'#3a4a3a', text:'#e0e0e0'},
-  theme4: {primary:'#d18aff', bg:'#1a1a2a', card:'#2a203a', input:'#3a2a4a', text:'#e0e0e0'},
-  theme5: {primary:'#ffb37f', bg:'#2a1f1a', card:'#3a2a2a', input:'#4a3a3a', text:'#f0e0d0'}
-};
+const timeInput=document.getElementById("targetTime");
+const result=document.getElementById("result");
+const themeBtn=document.getElementById("themeBtn");
+const themePanel=document.getElementById("themePanel");
+const themeSelect=document.getElementById("themeSelect");
 
-const themeToggleBtn = document.getElementById('themeToggleBtn');
-const themePanel = document.getElementById('themePanel');
-const themeSelect = document.getElementById('themeSelect');
-const saveCustom = document.getElementById('saveCustom');
+/* Load saved time */
+const saved=localStorage.getItem("huntTime");
+timeInput.value=saved||"10:00";
 
-const customInputs = {
-  primary: document.getElementById('customPrimary'),
-  bg: document.getElementById('customBg'),
-  card: document.getElementById('customCard'),
-  input: document.getElementById('customInput'),
-  text: document.getElementById('customText')
-};
+/* Save time */
+timeInput.addEventListener("input",()=>{
+localStorage.setItem("huntTime",timeInput.value);
+update();
+});
 
-// Apply theme
-function applyTheme(themeObj){
-  for(const key in themeObj){
-    document.documentElement.style.setProperty(`--${key}`, themeObj[key]);
-  }
+/* Reset */
+function resetTime(){
+localStorage.removeItem("huntTime");
+timeInput.value="10:00";
+update();
 }
 
-// Load saved theme
-let savedTheme = localStorage.getItem('theme');
+/* Timer logic */
+function update(){
+const now=new Date();
+const [h,m]=timeInput.value.split(":").map(Number);
+let target=new Date();
+target.setHours(h,m,0,0);
+if(now>=target)target.setDate(target.getDate()+1);
+const diff=target-now;
+const mins=Math.floor(diff/60000);
+result.textContent=`owo hb ${Math.floor(mins/60)}h${mins%60}m`;
+}
+
+setInterval(update,1000);
+update();
+
+/* Copy */
+function copyCmd(){
+navigator.clipboard.writeText(result.textContent);
+}
+
+/* Theme toggle */
+themeBtn.onclick=()=>themePanel.style.display=
+themePanel.style.display==="flex"?"none":"flex";
+
+themeSelect.onchange=()=>{
+document.documentElement.style.setProperty("--primary",themeSelect.value);
+localStorage.setItem("themeColor",themeSelect.value);
+};
+
+/* Load theme */
+const savedTheme=localStorage.getItem("themeColor");
 if(savedTheme){
-  try{
-    const parsed = JSON.parse(savedTheme);
-    if(parsed.custom) {
-      applyTheme(parsed.colors);
-    } else {
-      applyTheme(themes[parsed.name]);
-      themeSelect.value = parsed.name;
-    }
-  }catch(e){}
-} else {
-  applyTheme(themes.theme1);
+document.documentElement.style.setProperty("--primary",savedTheme);
+themeSelect.value=savedTheme;
 }
-
-// Toggle theme panel
-themeToggleBtn.addEventListener('click', ()=>{
-  themePanel.style.display = themePanel.style.display==='flex'?'none':'flex';
-  const computed = getComputedStyle(document.documentElement);
-  customInputs.primary.value = rgbToHex(computed.getPropertyValue('--primary'));
-  customInputs.bg.value = rgbToHex(computed.getPropertyValue('--bg'));
-  customInputs.card.value = rgbToHex(computed.getPropertyValue('--card'));
-  customInputs.input.value = rgbToHex(computed.getPropertyValue('--input'));
-  customInputs.text.value = rgbToHex(computed.getPropertyValue('--text'));
-});
-
-// Theme selector change
-themeSelect.addEventListener('change', ()=>{
-  const selected = themeSelect.value;
-  applyTheme(themes[selected]);
-  localStorage.setItem('theme', JSON.stringify({name:selected}));
-});
-
-// Live preview custom colors
-for(const key in customInputs){
-  customInputs[key].addEventListener('input', ()=>{
-    const colors = {
-      primary: customInputs.primary.value,
-      bg: customInputs.bg.value,
-      card: customInputs.card.value,
-      input: customInputs.input.value,
-      text: customInputs.text.value
-    };
-    applyTheme(colors);
-  });
-}
-
-// Save custom theme
-saveCustom.addEventListener('click', ()=>{
-  const colors = {
-    primary: customInputs.primary.value,
-    bg: customInputs.bg.value,
-    card: customInputs.card.value,
-    input: customInputs.input.value,
-    text: customInputs.text.value
-  };
-  applyTheme(colors);
-  localStorage.setItem('theme', JSON.stringify({custom:true, colors}));
-  themePanel.style.display='none';
-});
-
-// Convert RGB to HEX
-function rgbToHex(rgb){
-  const result = /^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/.exec(rgb.replace(/\s+/g,''));
-  return result ? "#" + ((1 << 24) + (parseInt(result[1]) <<16) + (parseInt(result[2])<<8) + parseInt(result[3])).toString(16).slice(1) : rgb;
-}
-
-// Huntbot Timer logic
-function updateTimer() {
-  const now = new Date();
-  const timeInput = document.getElementById("targetTime").value;
-  if (!timeInput) return;
-  const [hours, minutes] = timeInput.split(":").map(Number);
-  let target = new Date();
-  target.setHours(hours, minutes, 0, 0);
-  if(now >= target) target.setDate(target.getDate()+1);
-  const diff = target - now;
-  const totalMinutes = Math.floor(diff/(1000*60));
-  const h = Math.floor(totalMinutes/60);
-  const m = totalMinutes % 60;
-  document.getElementById("result").innerText = `owo hb ${h}h${m}m`;
-}
-
-// Copy command
-function copyText() {
-  const text = document.getElementById("result").innerText;
-  navigator.clipboard.writeText(text);
-  alert("Copied!");
-}
-
-document.getElementById("targetTime").addEventListener("input", updateTimer);
-setInterval(updateTimer, 1000);
-updateTimer();
 </script>
 
 </body>
